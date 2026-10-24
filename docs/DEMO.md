@@ -6,7 +6,7 @@ The updated CPU extraction pair took about 53 seconds (earlier implementation: a
 
 | Time | Action and suggested words |
 | --- | --- |
-| 0:00–0:10 | Load the fictional example and immediately click **Analyze with Gemma**. “A document diff shows changed words. RuleTrace shows how those words change outcomes.” |
+| 0:00–0:10 | Upload the example PDFs or load the fictional text, then click **Extract equipment rules**. “A document diff shows changed words. RuleTrace shows how those words change outcomes.” |
 | 0:10–0:35 | Point to the current and proposed text, which stays visible while inference runs. “Three items become two; seven days become five; training becomes required. These are fictional college equipment policies.” |
 | 0:35–1:05 | “Gemma 4 is running locally. It proposes compact JSON rules and selects source paragraphs. Python checks the schema and paragraph IDs, then attaches the original source text verbatim. The model never decides whether a borrower is eligible.” |
 | 1:05–1:40 | When extraction completes, open the source for **7 days → 5 days**. “A valid citation tells us where the proposal came from, not whether the interpretation is correct.” Use **Approve reading** for each correct rule interpretation and **Confirm heading** for both document titles. If inference is still running, explain unknown facts and the reject/edit controls; do not pretend it is complete. |

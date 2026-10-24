@@ -1,0 +1,21 @@
+{
+  "status": "passed",
+  "mode": "live-real-model",
+  "inference": {
+    "model": "gemma4:e2b",
+    "digest": "b37049369adfe3d2b653af0ab301a062ca5cbe96ace6aa0d3f2559ee9b563fc2",
+    "mode": "live-local-ollama",
+    "latency_seconds": 67.672,
+    "attempts": 2,
+    "original_latency_seconds": null,
+    "generated_at": "2026-10-24T07:03:50.201195+00:00"
+  },
+  "summary": {
+    "total": 5,
+    "changed": 4,
+    "allowed_both": 1,
+    "needs_review": 1
+  },
+  "pdf_pages": 5,
+  "scope": "Two fictional source PDFs; QA harness simulated review actions, no general accuracy claim."
+}

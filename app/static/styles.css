@@ -22,3 +22,5 @@ body{background:var(--bg)}.topbar{position:sticky;top:0;z-index:20;min-height:86
 @media(max-width:360px){.brand{font-size:18px}.mark{width:31px;height:31px;font-size:30px}.brand small{font-size:9px;max-width:135px}.status{max-width:127px;font-size:10px}.runtime{gap:5px}.topbar{gap:8px}.shell{padding:0 13px}.step>span:last-child{font-size:11px}.workflow{gap:3px}.policy-panel textarea{font-size:14px}.dropzone{flex-wrap:wrap}.dropzone .file-button{margin-left:0}.page-heading h1{font-size:34px}}
 .comparison-format-note{font-size:12px;line-height:1.8;color:#9eafca;margin:10px 0 0;max-width:85ch}
 .report-card .audit-export{margin-top:17px;font-size:13px;min-height:36px;text-align:left;color:#b9d9ff}
+.pdf-upload-status{margin:0 22px 15px;color:#b9d5f4;font-size:12px;line-height:1.7}
+.example-pdf-links{display:flex;flex-wrap:wrap;gap:12px;font-size:12px;line-height:1.8;color:#bfd9fa}.example-pdf-links a{text-underline-offset:4px}.example-pdf-links a:hover{color:#eff7ff}

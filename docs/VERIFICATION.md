@@ -10,7 +10,7 @@ Command:
 /home/tharun/hackfest-prep/.venv/bin/python -m pytest -q
 ```
 
-**117 passed, 0 failed**, in **4.51 seconds** in the final regression run. One dependency deprecation warning: Starlette's test client recommends `httpx2`; the application and tests use the requested HTTPX stack successfully. No package replacement was needed.
+**137 passed, 0 failed**, in **7.63 seconds** in the final regression run. Two nonfailing dependency deprecation warnings: Starlette's test client recommends `httpx2`, and pypdf deprecates the test-only `add_js` fixture helper. The application and tests use the pinned dependencies successfully.
 
 These tests use synthetic extraction fixtures and transport mocks where isolation is needed. They test evaluator semantics, source/schema validation, API review integrity, stale results, request bounds, rejection/ambiguity, expiry, repair limits and errors. They do not establish model accuracy.
 
@@ -114,3 +114,13 @@ The revised internal output schema requires an object property for every selecte
 The corrected adapter returned all three actual notes in one real Gemma call (39.014 seconds), preserving the three-to-two item limit and seven-to-five day duration. Nineteen new regression cases cover exact selection coverage, order-independent responses, missing/unknown/duplicate references, malformed or truncated JSON, invalid/blank fields, bounded repair and invalid selections. The full suite passed 117 tests with zero failures. The active comparison, existing notes and review actions were preserved during activation.
 
 The retry through the running API also returned HTTP 200 with all three selected notes in one model call (20.178 seconds). The existing approved reading for the unselected fourth change remained intact. Public API response fields stayed compatible with the already-open browser, so re-uploading or refreshing the whole page was unnecessary.
+
+## PDF policy input
+
+The file picker and drag-and-drop workflow now accept `.pdf` input, with direct text paste retained. The canonical fictional current/proposed policies are also provided as `examples/old_policy.pdf` and `examples/new_policy.pdf`; their extracted text matches the adjacent `.txt` fixtures exactly after trimming the final newline. PDFs are generated from those canonical sources with `python -m scripts.build_example_pdfs`.
+
+Real extraction tests cover both samples, the document comparison, page offsets, uppercase PDF filenames, content signatures rather than MIME-only acceptance, encrypted files, damaged files, scanned pages, mixed readable/unreadable pages, excessive page counts, decoded-stream budgets, nested indentation, worker timeout/cleanup and ignored active PDF actions. The whole suite passed **137 tests, 0 failures**.
+
+The browser check uploaded both actual example PDFs, checked the extracted previews, compared all four source changes, downloaded a readable PDF report, verified failed-upload preservation, and checked widths 320, 390, 768 and 1440 px. No JavaScript exceptions were observed.
+
+A separate real integration check uploaded both PDFs through the running API, performed fresh Gemma extraction (67.672 seconds, two model requests without repair), exercised review actions only in the QA harness, and produced the five independently expected outcomes. The final readable report parsed successfully with 5 pages. This verifies the fictional samples, not general PDF extraction or model accuracy. See [PDF upload verification](pdf-upload-verification.json) and [PDF upload workspace](pdf-upload-workspace.png).

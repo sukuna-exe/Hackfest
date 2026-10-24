@@ -12,13 +12,13 @@ A solo project by Tharun, with significant OpenAI Codex assistance. This is a de
 
 | Workflow | Supported input | What it does |
 | --- | --- | --- |
-| **Compare documents** | UTF-8 `.txt` policies up to **2 MB each** | Compares the complete text, pages through added/removed/modified source sections, highlights changed words, and exports all changes. Works with insurance, workplace, equipment and other policy text. |
+| **Compare documents** | Text-based PDFs up to **2 MB each**, or pasted text | Compares the complete text, pages through added/removed/modified source sections, highlights changed words, and exports all changes. Works with insurance, workplace, equipment and other policy text. |
 | **Review selected with Gemma** | Up to three changes from a document comparison | Runs real local inference on those changes only. Proposes short explanations with exact source passages. Human review and corrections are recorded. Unselected changes remain unreviewed. |
 | **Extract equipment rules** | Short equipment borrowing policies, up to 6,500 bytes and 40 paragraphs each | Gemma proposes supported item, duration and training rules. After explicit human review, Python compares editable borrowing requests under both policies. |
 
 Large upload support does **not** mean the entire document fits in the model's 4K context, or that every policy domain has an eligibility evaluator. Text comparison is deterministic and does not call a model. Selected Gemma notes never enter the equipment rule engine.
 
-**Uploads:** UTF-8 `.txt` only. Export source PDFs to text before uploading; PDF/OCR input is not supported. **Reports:** readable PDF is the primary download, with JSON audit data available separately.
+**Uploads:** text-based `.pdf` files up to 2 MB and 200 pages each. The server extracts the text into the editable preview. Scanned/image-only and password-protected PDFs are rejected; OCR is not included. You can still paste policy text directly. **Reports:** readable PDF is the primary download, with JSON audit data available separately.
 
 ![Exact policy text differences](docs/document-changes.png)
 
@@ -94,7 +94,7 @@ Model weights, virtual environments and caches are not committed. A compatible o
 
 ## Compare real policy documents
 
-1. Upload or paste the current and proposed UTF-8 text, up to 2 MB each.
+1. Upload current and proposed **PDFs**, up to 2 MB and 200 pages each, or paste policy text. Check each extracted preview against its PDF before comparing; reading order and table layout can differ.
 2. Click **Compare documents**. Inspect the complete text comparison using filters and pagination.
 3. Select up to three changes and click **Review selected with Gemma**. Only those source passages are sent to the local model. Each selected change is required in the structured response; incomplete output triggers one bounded repair and a specific validation error rather than being shown as a complete analysis.
 4. Check each proposed reading. **Approve reading** confirms the interpretation matches its sources; **Edit** records a correction; **Reject reading** marks it incorrect. These actions do not approve a policy change or determine coverage.
@@ -104,7 +104,7 @@ The interface never labels unselected changes as AI-reviewed. A report can conta
 
 ## Equipment demonstration
 
-Click **Load fictional example → Extract equipment rules**. The [current policy](examples/old_policy.txt) permits three items for seven days without a training prerequisite. The [proposed policy](examples/new_policy.txt) permits two items for five days and requires completed training.
+Upload [old_policy.pdf](examples/old_policy.pdf) as Current and [new_policy.pdf](examples/new_policy.pdf) as Proposed, or click **Load fictional example** to paste the canonical sample text. Then click **Extract equipment rules**. The [current policy](examples/old_policy.txt) permits three items for seven days without a training prerequisite. The [proposed policy](examples/new_policy.txt) permits two items for five days and requires completed training.
 
 Review six rule proposals and confirm both document headings. Then open **Test requests** and evaluate the [five fictional requests](examples/test_cases.json):
 
@@ -133,7 +133,8 @@ Evaluation accepts server analysis IDs, revisions, original text hashes and case
 ## Architecture
 
 ```text
-Up to 2 MB of policy text per version
+PDF upload (up to 2 MB / 200 pages) → isolated text extraction → editable preview
+    or direct policy text paste (up to 2 MB)
     → bounded source sections → deterministic text comparison → paged source-linked changes
     → selected changes → local Gemma notes → human review → complete comparison report
 
@@ -144,6 +145,7 @@ Short equipment policies
 
 | Module | Responsibility |
 | --- | --- |
+| `app/uploads.py`, `app/pdf_import_worker.py` | Bounded PDF upload, isolated extraction, page/text limits and editable previews. |
 | `app/documents.py` | Large text segmentation, diff, pagination, selected notes, human review and comparison reports. |
 | `app/inference.py` | Verified Ollama identity, bounded model calls, schema repair and labelled exact-input extraction reuse. |
 | `app/extraction.py` | Equipment evidence validation, hashes, restricted rule expansion and readiness. |
@@ -153,7 +155,7 @@ Short equipment policies
 | `app/main.py` | FastAPI routes, revisions, static hosting and security boundaries. |
 | `app/static/` | Responsive HTML5, CSS3 and vanilla JavaScript; no CDN or build step. |
 
-Technology: Python, FastAPI, Pydantic, HTTPX, Uvicorn, Ollama, Gemma 4 E2B, ReportLab PDF generation, HTML/CSS/JavaScript and pytest. No database, authentication, agent framework, arbitrary model expressions, frontend framework or OCR.
+Technology: Python, FastAPI, Pydantic, HTTPX, Uvicorn, Ollama, Gemma 4 E2B, ReportLab PDF generation, HTML/CSS/JavaScript and pytest. PDF text extraction uses pypdf; uploads use python-multipart. No database, authentication, agent framework, arbitrary model expressions, frontend framework or OCR.
 
 See [API contract](docs/API.md), `/docs`, and `/openapi.json`.
 
@@ -182,13 +184,15 @@ chromium --headless --remote-debugging-port=9223 --user-data-dir=/tmp/ruletrace-
 python -m scripts.browser_check
 python -m scripts.check_documents
 python -m scripts.check_pdf_reports
+python -m scripts.check_pdf_uploads
 ```
 
 Use a disposable profile. Restricted containers may need their own sandbox launch configuration. The checks exercise real model inference, review, correction, reports, actual megabyte-size file uploads, literal HTML handling and responsive layouts. Screenshots use fictional text and automated QA review, not institutional approval.
 
 ## Limits
 
-- Uploads accept UTF-8 text only; no PDF input, scans or OCR. PDF report export is supported. Maximum **2,097,152 bytes per policy** and **16 MB per HTTP request**.
+- PDF uploads accept selectable-text PDFs up to **2,097,152 bytes and 200 pages**. The extracted text and direct paste are also limited to 2 MB. HTTP bodies are capped at 16 MB. Password-protected, damaged and unreadable/scanned pages are rejected; OCR is not supported. Review extracted text against the original, especially columns, tables and OCR text layers.
+- PDF parsing runs in a separate process with a 40-second wall-clock deadline and at most two concurrent imports. Linux workers also have 512 MB address-space and CPU limits. Page content streams are bounded to 8 MB. Uploaded binaries are not retained; page offsets and extracted text are returned.
 - Source sections for document comparison are bounded to 900 UTF-8 bytes, up to 12,000 sections. Long paragraphs are split at safe boundaries. Blank-line formatting and whitespace around sections are ignored; original texts remain intact in the report. Alignment shows text differences, not semantic equivalence. Very repetitive text or paragraph restructuring can produce noisy comparisons.
 - Document changes are paged 20 at a time. Reports include every change and both full texts. At most three changes and a bounded 7,000-byte serialized source payload are sent to Gemma per notes request.
 - Only selected changes have AI notes. Notes are prose decision support, not executable rules or coverage decisions. Unsupported interpretations and human rejections remain visible.

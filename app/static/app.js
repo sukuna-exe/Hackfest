@@ -126,25 +126,47 @@ function updateSize(version) {
   nav();
 }
 
+async function importPdf(file) {
+  const form=new FormData();form.append("file",file);
+  const controller=new AbortController(), timer=setTimeout(()=>controller.abort(),50000);
+  try {
+    const response=await fetch("/api/policies/extract",{method:"POST",body:form,signal:controller.signal});
+    const result=await response.json().catch(()=>({}));
+    if(!response.ok)throw new Error(result.error?.message || "The PDF could not be read. Try another PDF or paste the policy text.");
+    return result;
+  }catch(error){
+    if(error.name === "AbortError")throw new Error("PDF reading timed out. Your previous policy is preserved; try a simpler PDF.");
+    throw error;
+  }finally{clearTimeout(timer);}
+}
+
 async function readFile(version, file) {
   if (!file || state.busy) return;
+  let reading=false;
+  const status=$(`#upload-status-${version}`);
   try {
-    if (!/\.txt$/i.test(file.name)) throw new Error("Choose a .txt file containing UTF-8 text.");
-    if (!file.size) throw new Error("This file is empty. Choose a policy with text.");
-    if (file.size > MAX_POLICY_BYTES) throw new Error("Each policy must be at most 2 MB.");
-    const text = new TextDecoder("utf-8", {fatal:true}).decode(await file.arrayBuffer());
-    if (!text.trim()) throw new Error("The policy contains no readable text.");
-    if (/[\x00-\x08\x0b\x0c\x0e-\x1f]/.test(text)) throw new Error("The file contains binary or unsupported control characters.");
+    if (!/\.pdf$/i.test(file.name)) throw new Error("Choose a .pdf policy file, or paste text directly below.");
+    if (!file.size) throw new Error("This PDF is empty. Choose a policy with selectable text.");
+    if (file.size > MAX_POLICY_BYTES) throw new Error("Each PDF must be at most 2 MB.");
+    reading=true;busy(true);
+    $(`#file-error-${version}`).hidden=true;
+    status.textContent="Reading PDF and extracting text…";status.hidden=false;
+    const result=await importPdf(file);
     invalidatePolicies();
-    $(`#text-${version}`).value = text;
-    $(`#filename-${version}`).textContent = file.name;
+    $(`#text-${version}`).value=result.text;
+    $(`#filename-${version}`).textContent=`${result.filename} · ${result.page_count} ${result.page_count === 1 ? "page":"pages"}`;
+    $(`#filename-${version}`).title=`PDF size: ${result.file_bytes.toLocaleString()} bytes`;
     updateSize(version);
-    toast(`${version === "current" ? "Current" : "Proposed"} policy loaded`);
+    status.textContent=`Text extracted from ${result.page_count} ${result.page_count === 1 ? "page":"pages"}. Check the preview against your PDF before analysis.`;
+    toast(`${version === "current" ? "Current" : "Proposed"} PDF loaded`);
   } catch (error) {
     const field = $(`#file-error-${version}`);
-    field.textContent = error instanceof TypeError ? "File is unreadable or not valid UTF-8." : error.message;
-    field.hidden = false;
-  } finally { $(`#file-${version}`).value = ""; }
+    field.textContent=error.message || "The PDF could not be read.";field.hidden=false;
+    if(reading)status.hidden=true;
+  } finally {
+    $(`#file-${version}`).value="";
+    if(reading)busy(false);
+  }
 }
 
 async function health() {
@@ -169,7 +191,7 @@ async function loadExample() {
     invalidatePolicies();
     for (const version of ["current", "proposed"]) {
       $(`#text-${version}`).value = data[version];
-      $(`#filename-${version}`).textContent = `Fictional ${version} policy.txt`;
+      $(`#filename-${version}`).textContent = `Fictional ${version} policy · example text`;
       updateSize(version);
     }
     state.cases = data.cases;
@@ -408,12 +430,12 @@ async function downloadReport(format="pdf") {
 }
 
 for (const version of ["current","proposed"]) {
-  $(`#text-${version}`).addEventListener("input", () => { invalidatePolicies(); $(`#filename-${version}`).textContent = "Edited text"; updateSize(version); });
+  $(`#text-${version}`).addEventListener("input", () => { invalidatePolicies(); $(`#filename-${version}`).textContent = "Edited text"; $(`#upload-status-${version}`).hidden=true; updateSize(version); });
   $(`#file-${version}`).addEventListener("change", event => readFile(version,event.target.files[0]));
   const drop = $(`#drop-${version}`);
   drop.addEventListener("dragover", event => { event.preventDefault(); if (!state.busy) drop.classList.add("dragging"); });
   drop.addEventListener("dragleave", () => drop.classList.remove("dragging"));
-  drop.addEventListener("drop", event => { event.preventDefault(); drop.classList.remove("dragging"); if (event.dataTransfer.files.length !== 1) { const error = $(`#file-error-${version}`); error.textContent = "Drop one .txt file at a time."; error.hidden = false; return; } readFile(version,event.dataTransfer.files[0]); });
+  drop.addEventListener("drop", event => { event.preventDefault(); drop.classList.remove("dragging"); if (event.dataTransfer.files.length !== 1) { const error = $(`#file-error-${version}`); error.textContent = "Drop one PDF file at a time."; error.hidden = false; return; } readFile(version,event.dataTransfer.files[0]); });
 }
 
 $("#load-example").addEventListener("click",loadExample);

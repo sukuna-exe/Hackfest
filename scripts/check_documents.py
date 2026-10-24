@@ -63,15 +63,11 @@ def main():
     assert report["coverage"]["ai_reviewed_changes"]==1 and report["coverage"]["total_changes"]==2
     assert report["policies"]["current"]==old
     print("REAL scoped Gemma note PASS",note["inference"],flush=True)
-    # Upload actual files above one megabyte; compare all their text without inference.
+    # Direct paste retains support for large text independently of the PDF file limit.
     b.click('[data-stage="0"]')
     text=("General terms and conditions apply to this fictional policy. "*8+"\n\n")*3500
     for version,content in [("current",text),("proposed",text+"\nA new exclusion applies.")]:
-        path=Path(f"/tmp/ruletrace-large-{version}.txt");path.write_text(content)
-        root=b.call("DOM.getDocument")["root"]["nodeId"]
-        node=b.call("DOM.querySelector",{"nodeId":root,"selector":f"#file-{version}"})["nodeId"]
-        b.call("DOM.setFileInputFiles",{"nodeId":node,"files":[str(path)]})
-        b.wait(f"document.querySelector('#filename-{version}').textContent.includes('large-{version}')")
+        b.js(f"(() => {{const area=document.querySelector('#text-{version}');area.value={json.dumps(content)};area.dispatchEvent(new Event('input',{{bubbles:true}}));}})()")
     b.click("#compare-documents")
     b.wait("state.document && state.document.summary.current_sections===3500")
     assert b.js("state.document.summary.changed_sections")==1
@@ -83,7 +79,7 @@ def main():
     assert not b.errors,b.errors
     measured={"scoped_note_inference":note["inference"],"large_text":{"bytes_per_current_policy":len(text.encode()),"comparison_seconds":b.js("state.document.latency_seconds"),"current_sections":3500,"changes":1},"browser_status":"passed"}
     Path("docs/document-verification.json").write_text(json.dumps(measured,indent=2)+"\n")
-    print("Large-file browser upload/comparison, note correction, JSON download, responsive layouts PASS",measured["large_text"],flush=True)
+    print("Large-text paste/comparison, note correction, JSON download, responsive layouts PASS",measured["large_text"],flush=True)
     b.ws.close()
 
 

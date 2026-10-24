@@ -54,3 +54,13 @@ PDF rendering runs outside the application event loop, with up to two concurrent
 ### Exact selected-change coverage
 
 The internal Ollama notes schema uses an object with one required property per selected change ID and disallows unselected properties. The external document API response remains unchanged. Validation rejects missing, fabricated or duplicate source keys, blank summaries, invalid attention flags and truncated output. At most one repair uses the specific failure and exact required IDs in a bounded replacement prompt. Logs contain validation codes and counts, never policy text or generated prose.
+
+## PDF policy input
+
+`POST /api/policies/extract` accepts multipart form data with one `file` field. It requires a nonempty `.pdf` filename and valid PDF content, at most 2,097,152 bytes and 200 pages. Text paste through existing JSON endpoints remains supported.
+
+The typed response contains `filename`, `file_bytes`, SHA-256 of the uploaded PDF, `page_count`, `text`, `text_bytes`, `pages` (page number and start/end character offsets in extracted text), and a preview-review message. Relative indentation is preserved where the extractor can recover it. The application compares and cites this extracted text; it does not execute PDF actions or retain the uploaded binary.
+
+The worker runs outside the API process, with a 40-second wall-clock limit, at most two imports, Linux memory/CPU limits, and an 8 MB per-page decoded content-stream budget. It rejects encrypted files, unreadable/scanned pages, excessive page counts, malformed content, oversized output and timeouts with distinct `error.code` values. No unreadable page is silently treated as an empty policy.
+
+`GET /api/examples/current/pdf` and `GET /api/examples/proposed/pdf` download the fictional example PDFs. The same files are in `examples/old_policy.pdf` and `examples/new_policy.pdf`. Regenerate them with `python -m scripts.build_example_pdfs`.

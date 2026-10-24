@@ -19,10 +19,12 @@ from .limits import MAX_REQUEST_BYTES
 from .schemas import (Analysis, Comparison, Evaluation, EvaluationRequest, Health,
                       PolicyInputs, Report, ReportRequest, ReviewRequest)
 from .documents import router as document_router
+from .uploads import router as upload_router
 
 ROOT = Path(__file__).resolve().parent
 app = FastAPI(title="RuleTrace AI", version="1.0.0", description="Gemma proposes. Humans review. Python evaluates.")
 app.include_router(document_router)
+app.include_router(upload_router)
 app.mount("/static", StaticFiles(directory=ROOT / "static"), name="static")
 adapter = OllamaAdapter()
 sessions = {}
@@ -216,3 +218,9 @@ async def examples():
     return {"current": (directory / "old_policy.txt").read_text(),
             "proposed": (directory / "new_policy.txt").read_text(),
             "cases": json.loads((directory / "test_cases.json").read_text())}
+
+
+@app.get("/api/examples/{version}/pdf", responses={200: {"content": {"application/pdf": {"schema": {"type": "string", "format": "binary"}}}}})
+async def example_pdf(version: Literal["current", "proposed"]):
+    name="old_policy.pdf" if version=="current" else "new_policy.pdf"
+    return FileResponse(ROOT.parent/"examples"/name,media_type="application/pdf",filename=name)

@@ -69,23 +69,23 @@ class Browser:
 def verify_uploads(browser):
     browser.click('[data-stage="0"]')
     browser.js("loadExample()")
-    browser.wait("document.querySelector('#text-current').value.includes('seven days') && !document.querySelector('#text-current').value.includes('Edited.')")
     old_text = browser.js("document.querySelector('#text-current').value")
-    for name, content in [("wrong.pdf", "data"), ("empty.txt", ""), ("binary.txt", "\x00"), ("large.txt", "x" * (2*1024*1024+1))]:
+    for name, content in [("wrong.txt", "data"), ("empty.pdf", ""), ("disguised.pdf", "<script>not a PDF</script>"), ("large.pdf", "x" * (2*1024*1024+1))]:
         browser.js("document.querySelector('#file-error-current').hidden=true")
-        browser.js(f"(() => {{const dt=new DataTransfer();dt.items.add(new File([{json.dumps(content)}],{json.dumps(name)},{{type:'text/plain'}}));const input=document.querySelector('#file-current');input.files=dt.files;input.dispatchEvent(new Event('change',{{bubbles:true}}));}})()")
+        browser.js(f"(() => {{const dt=new DataTransfer();dt.items.add(new File([{json.dumps(content)}],{json.dumps(name)},{{type:'application/pdf'}}));const input=document.querySelector('#file-current');input.files=dt.files;input.dispatchEvent(new Event('change',{{bubbles:true}}));}})()")
         browser.wait("!document.querySelector('#file-error-current').hidden")
+        browser.wait("!state.busy")
         assert browser.js("document.querySelector('#text-current').value") == old_text, name
-    browser.js("(() => {document.querySelector('#file-error-current').hidden=true;const dt=new DataTransfer();dt.items.add(new File([new Uint8Array([255,254])],'invalid.txt'));const input=document.querySelector('#file-current');input.files=dt.files;input.dispatchEvent(new Event('change',{bubbles:true}));})()")
-    browser.wait("!document.querySelector('#file-error-current').hidden")
-    assert browser.js("document.querySelector('#text-current').value") == old_text
-    browser.js("(() => {const dt=new DataTransfer();dt.items.add(new File(['<img src=x onerror=alert(1)>'],'safe-text.txt'));const input=document.querySelector('#file-current');input.files=dt.files;input.dispatchEvent(new Event('change',{bubbles:true}));})()")
-    browser.wait("document.querySelector('#text-current').value.includes('<img')")
-    assert not browser.js("document.querySelector('img')"), "Policy HTML must remain text"
-    assert browser.js("document.querySelector('#filename-current').textContent") == "safe-text.txt"
+    root=browser.call("DOM.getDocument")["root"]["nodeId"]
+    node=browser.call("DOM.querySelector",{"nodeId":root,"selector":"#file-current"})["nodeId"]
+    browser.call("DOM.setFileInputFiles",{"nodeId":node,"files":[str(ROOT / "examples/old_policy.pdf")]})
+    browser.wait("document.querySelector('#filename-current').textContent.includes('old_policy.pdf')")
+    browser.wait("!state.busy")
+    assert browser.js("document.querySelector('#text-current').value") == (ROOT / "examples/old_policy.txt").read_text().strip()
+    browser.js("(() => {const area=document.querySelector('#text-current');area.value='<img src=x onerror=alert(1)>';area.dispatchEvent(new Event('input',{bubbles:true}));})()")
+    assert not browser.js("document.querySelector('img')"), "Pasted HTML must remain text"
     browser.js("loadExample()")
-    browser.wait("document.querySelector('#text-current').value.includes('seven days')")
-    print("File validation PASS: extension, empty, control characters, size, invalid UTF-8, input preservation, literal HTML", flush=True)
+    print("PDF validation PASS: extension, empty, disguised content, size, previous input preservation, real PDF extraction, literal pasted HTML", flush=True)
 
 
 def main():
