@@ -35,6 +35,16 @@ class NoteProposal(StrictModel):
     attention: str = Field(pattern="^(clear|ambiguous|unsupported)$")
 
 
+class NoteReading(StrictModel):
+    """The model supplies text only; source identity is constrained by schema keys."""
+    summary: str = Field(min_length=1, max_length=1500)
+    attention: Literal["clear", "ambiguous", "unsupported"]
+
+
+class NotesByChange(StrictModel):
+    notes: dict[str, NoteReading] = Field(min_length=1, max_length=3)
+
+
 class DocumentNote(StrictModel):
     original: NoteProposal
     reviewed_summary: str | None

@@ -10,7 +10,7 @@ Command:
 /home/tharun/hackfest-prep/.venv/bin/python -m pytest -q
 ```
 
-**98 passed, 0 failed**, in **2.77 seconds** in the final regression run. One dependency deprecation warning: Starlette's test client recommends `httpx2`; the application and tests use the requested HTTPX stack successfully. No package replacement was needed.
+**117 passed, 0 failed**, in **4.51 seconds** in the final regression run. One dependency deprecation warning: Starlette's test client recommends `httpx2`; the application and tests use the requested HTTPX stack successfully. No package replacement was needed.
 
 These tests use synthetic extraction fixtures and transport mocks where isolation is needed. They test evaluator semantics, source/schema validation, API review integrity, stale results, request bounds, rejection/ambiguity, expiry, repair limits and errors. They do not establish model accuracy.
 
@@ -104,3 +104,13 @@ The real browser check downloaded and parsed a two-page document PDF, then downl
 The runtime adds ReportLab; the development requirements add pypdf for content verification. Fonts are bundled under their separate original license. Original application MIT license remains unchanged.
 
 The equipment workflow also passed through live browser extraction, explicit QA review actions, deterministic evaluation and both PDF/JSON downloads. Its PDF was parsed to confirm the case results were present. No JavaScript exceptions were observed.
+
+## Selected-change notes regression
+
+A reported failure was reproduced on Changes 1, 2 and 3 of the fictional equipment example. The former array schema allowed only one item, so Gemma returned a note only for Change 1 in both the initial and repair responses. The application rejected these incomplete responses, but its generic error did not identify the missing changes.
+
+The revised internal output schema requires an object property for every selected change ID. It preserves the public API shape, retains strict source validation and uses one specific, bounded repair without accumulating bad output in the 4K context. Metadata-only logging identifies future validation failures without logging policy contents.
+
+The corrected adapter returned all three actual notes in one real Gemma call (39.014 seconds), preserving the three-to-two item limit and seven-to-five day duration. Nineteen new regression cases cover exact selection coverage, order-independent responses, missing/unknown/duplicate references, malformed or truncated JSON, invalid/blank fields, bounded repair and invalid selections. The full suite passed 117 tests with zero failures. The active comparison, existing notes and review actions were preserved during activation.
+
+The retry through the running API also returned HTTP 200 with all three selected notes in one model call (20.178 seconds). The existing approved reading for the unselected fourth change remained intact. Public API response fields stayed compatible with the already-open browser, so re-uploading or refreshing the whole page was unnecessary.

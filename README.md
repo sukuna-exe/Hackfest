@@ -96,7 +96,7 @@ Model weights, virtual environments and caches are not committed. A compatible o
 
 1. Upload or paste the current and proposed UTF-8 text, up to 2 MB each.
 2. Click **Compare documents**. Inspect the complete text comparison using filters and pagination.
-3. Select up to three changes and click **Review selected with Gemma**. Only those source passages are sent to the local model.
+3. Select up to three changes and click **Review selected with Gemma**. Only those source passages are sent to the local model. Each selected change is required in the structured response; incomplete output triggers one bounded repair and a specific validation error rather than being shown as a complete analysis.
 4. Check each proposed reading. **Approve reading** confirms the interpretation matches its sources; **Edit** records a correction; **Reject reading** marks it incorrect. These actions do not approve a policy change or determine coverage.
 5. Open **Report** and click **Download PDF report**. It includes a clear summary, every changed source passage, AI interpretations and corrections, review status, and provenance. **Export audit data (JSON)** is a secondary option containing both complete original texts and the full machine-readable audit history.
 

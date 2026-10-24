@@ -50,3 +50,7 @@ The website's primary action is **Download PDF report**. Both report endpoints a
 PDF responses use `Content-Type: application/pdf` and attachment filenames `ruletrace-report.pdf` or `ruletrace-document-report.pdf`. `format=json` and the omitted parameter retain existing JSON exports. Unsupported format values return the standard validation error.
 
 PDF rendering runs outside the application event loop, with up to two concurrent exports. It uses an immutable copy of the validated report data, makes no inference call, and escapes policy/model/reviewer text before creating PDF paragraphs. Source tags are rendered literally rather than interpreted as markup. Report fonts are embedded for offline portability. Both PDFs and JSON obey the same expiry and revision guards.
+
+### Exact selected-change coverage
+
+The internal Ollama notes schema uses an object with one required property per selected change ID and disallows unselected properties. The external document API response remains unchanged. Validation rejects missing, fabricated or duplicate source keys, blank summaries, invalid attention flags and truncated output. At most one repair uses the specific failure and exact required IDs in a bounded replacement prompt. Logs contain validation codes and counts, never policy text or generated prose.
