@@ -1,0 +1,40 @@
+{
+  "scoped_note_inference": {
+    "model": "gemma4:e2b",
+    "digest": "b37049369adfe3d2b653af0ab301a062ca5cbe96ace6aa0d3f2559ee9b563fc2",
+    "mode": "live-local-ollama",
+    "latency_seconds": 27.537,
+    "attempts": 1,
+    "original_latency_seconds": null,
+    "generated_at": "2026-10-24T04:56:48.756163+00:00"
+  },
+  "large_text": {
+    "bytes_per_current_policy": 1715000,
+    "comparison_seconds": 0.042,
+    "current_sections": 3500,
+    "changes": 1
+  },
+  "browser_status": "passed",
+  "additional_fresh_note": {
+    "model": "gemma4:e2b",
+    "digest": "b37049369adfe3d2b653af0ab301a062ca5cbe96ace6aa0d3f2559ee9b563fc2",
+    "mode": "live-local-ollama",
+    "latency_seconds": 16.265,
+    "attempts": 1,
+    "original_latency_seconds": null,
+    "generated_at": "2026-10-24T04:58:38.488495+00:00"
+  },
+  "equipment_reuse": {
+    "wall_seconds": 0.026,
+    "inference": {
+      "model": "gemma4:e2b",
+      "digest": "b37049369adfe3d2b653af0ab301a062ca5cbe96ace6aa0d3f2559ee9b563fc2",
+      "mode": "cached-local-ollama",
+      "latency_seconds": 0.02,
+      "attempts": 0,
+      "original_latency_seconds": 54.843,
+      "generated_at": "2026-10-24T05:01:48.774921+00:00"
+    },
+    "new_review_pending": true
+  }
+}

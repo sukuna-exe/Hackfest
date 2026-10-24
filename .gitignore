@@ -205,6 +205,14 @@ cython_debug/
 # Temporary file for partial code execution
 tempCodeRunnerFile.py
 
+# RuleTrace local runtime, model weights, and private configuration
+.env.*
+!.env.example
+models/
+*.gguf
+node_modules/
+browser-profile/
+
 # Ruff stuff:
 .ruff_cache/
 

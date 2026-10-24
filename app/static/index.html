@@ -1,0 +1,95 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="theme-color" content="#0b1020">
+  <meta name="description" content="Compare policy versions, review Gemma's source-linked rules, and trace their effect on sample requests.">
+  <title>RuleTrace AI — Policy impact workspace</title>
+  <link rel="icon" href="/static/mark.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="/static/styles.css">
+  <script src="/static/app.js" defer></script>
+  <script src="/static/documents.js" defer></script>
+</head>
+<body>
+  <a class="skip-link" href="#workspace">Skip to workspace</a>
+  <header class="topbar">
+    <a class="brand" href="/" aria-label="RuleTrace AI home"><span class="mark" aria-hidden="true">↳</span><span>RuleTrace<span class="ai">AI</span><small>See what a policy change changes.</small></span></a>
+    <div class="runtime"><span class="local-label">LOCAL INFERENCE</span><button id="model-status" class="status checking" title="Check model connection"><span class="dot"></span><span id="model-label">Checking Gemma…</span><span aria-hidden="true">↻</span></button><button class="icon-button" id="help-button" aria-label="About this prototype">?</button></div>
+  </header>
+
+<div class="app-layout"><aside class="sidebar"><div class="sidebar-label">YOUR WORKSPACE</div>    <nav class="workflow" aria-label="Policy comparison workflow">
+      <button class="step active" data-stage="0" aria-current="step"><span class="step-number">01</span><span>Documents<small>Bring both versions</small></span></button><span class="step-line" aria-hidden="true"></span>
+      <button class="step" data-stage="1" disabled><span class="step-number">02</span><span>Review changes<small>Read the evidence</small></span></button><span class="step-line" aria-hidden="true"></span>
+      <button class="step" data-stage="2" disabled><span class="step-number">03</span><span>Test requests<small>Trace the impact</small></span></button><span class="step-line" aria-hidden="true"></span>
+      <button class="step" data-stage="3" disabled><span class="step-number">04</span><span>Report<small>Take the evidence with you</small></span></button>
+    </nav><div class="sidebar-bottom"><span class="privacy-icon">⌘</span><strong>Keep the context.</strong><p>Source-linked changes.<br>Human-reviewed interpretations.</p><span class="sidebar-chip">Local workspace</span></div></aside><div class="shell">
+
+
+    <main id="workspace" tabindex="-1">
+      <div id="notice" class="notice" role="status" hidden></div>
+      <div id="error" class="error-banner" role="alert" hidden><div><strong id="error-title">Something needs attention</strong><p id="error-message"></p></div><button id="retry" class="button small">Retry</button><button id="dismiss-error" class="icon-button" aria-label="Dismiss error">×</button></div>
+
+      <section id="stage-0" class="stage" aria-labelledby="policies-title">
+        <div class="page-heading"><div><p class="eyebrow"><span class="tiny-square"></span> DOCUMENT INTELLIGENCE / COMPARE</p><h1 id="policies-title">Every word matters.<br><span>See what changed.</span></h1><p class="lede">Two versions. One clear view of the difference.<br class="wide-only"> Compare policies, inspect the evidence, and review the meaning.</p></div><div class="heading-note"><span class="note-icon" aria-hidden="true">↗</span><span>Built for the details.<br><strong>Text comparison up to 2 MB.</strong><br>Gemma review where you need it.</span></div></div>
+
+        <div class="policy-grid">
+          <article class="policy-panel" data-version="current">
+            <header class="panel-heading"><div class="panel-title"><span class="document-icon" aria-hidden="true">≡</span><div><span class="overline">THE BASELINE</span><h2>Current policy</h2></div></div><span class="version-tag">v.01</span></header>
+            <div class="dropzone" id="drop-current"><span class="upload-icon" aria-hidden="true">↑</span><div><strong>Drop your policy here</strong><p>UTF-8 .txt · up to 2 MB</p></div><label class="button small file-button" for="file-current">Browse files<input id="file-current" type="file" accept=".txt,text/plain"></label></div>
+            <div class="editor-label"><label for="text-current">POLICY TEXT</label><span>or paste below</span></div>
+            <textarea id="text-current" spellcheck="false" placeholder="Paste the policy currently in effect…" aria-describedby="file-error-current" maxlength="2097152"></textarea>
+            <p id="file-error-current" class="field-error" role="alert" hidden></p>
+            <footer class="editor-footer"><span id="filename-current">No file selected</span><span id="size-current">0 B / 2 MB</span></footer>
+          </article>
+          <article class="policy-panel proposed" data-version="proposed">
+            <header class="panel-heading"><div class="panel-title"><span class="document-icon" aria-hidden="true">≡</span><div><span class="overline">THE CHANGE</span><h2>Proposed policy</h2></div></div><span class="version-tag">v.02</span></header>
+            <div class="dropzone" id="drop-proposed"><span class="upload-icon" aria-hidden="true">↑</span><div><strong>Drop your policy here</strong><p>UTF-8 .txt · up to 2 MB</p></div><label class="button small file-button" for="file-proposed">Browse files<input id="file-proposed" type="file" accept=".txt,text/plain"></label></div>
+            <div class="editor-label"><label for="text-proposed">POLICY TEXT</label><span>or paste below</span></div>
+            <textarea id="text-proposed" spellcheck="false" placeholder="Paste the proposed replacement policy…" aria-describedby="file-error-proposed" maxlength="2097152"></textarea>
+            <p id="file-error-proposed" class="field-error" role="alert" hidden></p>
+            <footer class="editor-footer"><span id="filename-proposed">No file selected</span><span id="size-proposed">0 B / 2 MB</span></footer>
+          </article>
+        </div>
+        <div class="workspace-mode"><span class="mode-label">CHOOSE YOUR WORKFLOW</span><span class="mode-pill">Any text policy → document comparison</span><span class="mode-pill">Equipment requests → reviewed rule test</span></div><div class="analysis-actions"><div><button class="button" id="load-example"><span aria-hidden="true">↗</span> Load fictional example</button><span class="quiet-label">Try a college equipment policy</span></div><div class="primary-actions"><button class="button primary" id="compare-documents">Compare documents <span aria-hidden="true">→</span></button><button class="button" id="analyze"><span class="spark" aria-hidden="true">✧</span><span id="analyze-label">Extract equipment rules</span></button></div></div>
+        <div id="analysis-progress" class="loading-panel" role="status" hidden><span class="spinner" aria-hidden="true"></span><div><strong>Gemma is reading both policies</strong><p>Running real local inference. Your policies stay here while the model works.</p><span id="elapsed">Elapsed: 0s</span></div></div>
+        <div class="scope-strip"><div><span class="scope-number">01</span><p><strong>Find the exact differences</strong><span>Insurance, workplace, equipment, and other text policies.</span></p></div><div><span class="scope-number">02</span><p><strong>Keep a human in control</strong><span>Select changes for source-linked Gemma notes.</span></p></div><div><span class="scope-number">03</span><p><strong>Explain every outcome</strong><span>Download sources, changes, and review history.</span></p></div></div>
+      </section>
+
+      <section id="stage-1" class="stage" aria-labelledby="review-title" hidden>
+<div id="document-review-area" hidden></div>
+<div id="rule-review-area">
+        <div class="page-heading compact"><div><p class="eyebrow">02 / HUMAN REVIEW</p><h1 id="review-title">Check Gemma’s reading.<br><span>Does it match the policy?</span></h1><p class="lede">Review both versions so the comparison uses the right rules for each.</p></div><div class="review-counter"><strong id="review-count">0 / 0</strong><span>interpretations reviewed</span></div></div>
+        <aside class="review-help" aria-label="How to review interpretations"><p>These controls review <strong>Gemma’s interpretation of the quoted text</strong>. Approving a reading records that the extracted rule matches its source.</p><div class="review-help-actions"><p><strong>✓ Approve reading</strong>The value matches the policy.</p><p><strong>Edit</strong>Correct a value Gemma misread.</p><p><strong>Reject reading</strong>Mark it incorrect. That policy stays unresolved until corrected.</p></div></aside>
+        <div id="rule-provenance" class="coverage-banner" role="status" hidden></div>
+        <div class="review-toolbar"><div class="legend"><span><i class="legend-dot indigo"></i> AI proposal</span><span><i class="legend-dot teal"></i> Human approved</span><span><i class="legend-dot amber"></i> Unresolved</span></div><div class="entry-actions"><button class="button small" id="fresh-analysis">Run fresh Gemma extraction</button><button class="button small" id="view-sources">View source documents ↗</button></div></div>
+        <div id="rule-cards"></div>
+        <div class="review-bottom"><p id="review-guidance">Review all proposals to continue.</p><button class="button primary" id="to-requests" disabled>Test requests <span aria-hidden="true">→</span></button></div>
+</div>
+      </section>
+
+      <section id="stage-2" class="stage" aria-labelledby="test-title" hidden>
+        <div class="page-heading compact"><div><p class="eyebrow">03 / DETERMINISTIC IMPACT</p><h1 id="test-title">Same requests.<br><span>Different consequences.</span></h1><p class="lede">Test each case against both reviewed policies. No model makes these decisions.</p></div><span class="pill">Python rule evaluator</span></div>
+        <details class="case-editor" id="case-editor" open><summary><span><strong>Borrowing requests</strong><span class="muted">Edit the cases you want to test</span></span><span aria-hidden="true">⌄</span></summary><div class="case-editor-body"><div class="table-scroll"><table class="case-table"><thead><tr><th scope="col">Case name</th><th scope="col">Items</th><th scope="col">Days</th><th scope="col">Training completed</th><th scope="col"><span class="sr-only">Remove</span></th></tr></thead><tbody id="case-rows"></tbody></table></div><div class="case-actions"><div><button class="button small" id="add-case">+ Add case</button><button class="text-button" id="load-cases">Load fictional cases</button></div><button class="button primary" id="evaluate">Evaluate requests <span aria-hidden="true">→</span></button></div><p class="muted input-hint">Items and days: 1–365. Leave blank for unknown. Example people and policies are fictional.</p></div></details>
+        <div id="results-empty" class="empty-state"><span aria-hidden="true">↳</span><h2>The impact starts with a request.</h2><p>Add cases above, then run the evaluator to compare outcomes.</p></div>
+        <div id="results" hidden><div id="metrics" class="metrics"></div><div class="results-heading"><div><p class="eyebrow">OUTCOME COMPARISON</p><h2>Trace every consequence.</h2></div><div class="filters" role="group" aria-label="Filter results"><button data-filter="all" class="selected" aria-pressed="true">All cases</button><button data-filter="changed" aria-pressed="false">Changed outcomes</button><button data-filter="review" aria-pressed="false">Needs review</button></div></div><div class="table-scroll results-wrap"><table class="results-table"><thead><tr><th scope="col">Case</th><th scope="col">Current policy</th><th scope="col">Proposed policy</th><th scope="col">Explanation & evidence</th></tr></thead><tbody id="result-rows"></tbody></table></div><div class="review-bottom"><p class="muted">Outcomes apply only to the reviewed rules and supplied information.</p><button class="button primary" id="to-report">View report <span aria-hidden="true">→</span></button></div></div>
+      </section>
+
+      <section id="stage-3" class="stage" aria-labelledby="report-title" hidden>
+<div id="document-report-area" hidden></div><div id="rule-report-area">
+        <div class="page-heading compact"><div><p class="eyebrow">04 / YOUR AUDIT TRAIL</p><h1 id="report-title">The impact, explained.<br><span>The evidence, included.</span></h1><p class="lede">A portable record of the policy sources, human review, and evaluated outcomes.</p></div></div>
+        <div class="report-grid"><article class="report-card"><span class="report-symbol" aria-hidden="true">↳</span><span class="overline">POLICY IMPACT REPORT</span><h2>From policy language<br>to traceable outcomes.</h2><div id="report-summary"></div><button class="button primary" id="download">↓ Download PDF report</button><button class="text-button audit-export" id="download-json">Export audit data (JSON)</button><p class="muted">A readable summary, outcomes, reviewed rules, and source evidence. JSON keeps the complete audit data.</p></article><div><article class="audit-card"><h2>Review & interpretation</h2><dl id="review-metadata"></dl></article><article class="audit-card"><h2>Inference record</h2><dl id="inference-metadata"></dl></article><p class="report-disclaimer">Decision support, with human oversight. AI can misinterpret a policy even when the cited words are exact. This prototype supports items, borrowing duration, and training only.</p></div></div>
+</div>
+      </section>
+    </main>
+    <footer class="site-footer"><span>RuleTrace AI <span class="footer-divider">/</span> Clarity in every change</span><span>Decision support. Human review required.<span class="footer-divider">/</span><a href="https://github.com/sukuna-exe/Hackfest" target="_blank" rel="noreferrer">Source code ↗</a></span></footer>
+  </div>
+
+</div>
+  <dialog id="source-dialog" class="source-dialog"><div class="dialog-heading"><div><p class="eyebrow">SOURCE EVIDENCE</p><h2>Read the words behind the rule.</h2></div><button class="icon-button" data-close="source-dialog" aria-label="Close source documents">×</button></div><p class="muted">An exact excerpt confirms where the proposal came from. Review its meaning and surrounding context.</p><div id="source-content" class="source-grid"></div></dialog>
+  <dialog id="edit-dialog"><form id="edit-form"><div class="dialog-heading"><h2>Edit the interpretation</h2><button type="button" class="icon-button" data-close="edit-dialog" aria-label="Close rule editor">×</button></div><p id="edit-description" class="muted"></p><label for="edit-value">Reviewed value</label><input id="edit-value" type="number" min="1" max="365" step="1"><select id="edit-training" aria-label="Reviewed training prerequisite"><option value="true">Training is required</option><option value="false">No training prerequisite</option></select><blockquote id="edit-evidence"></blockquote><p class="muted">The original AI proposal and source excerpt stay in the audit trail. A correction invalidates previous results.</p><button class="button primary" type="submit">Save reviewed correction</button></form></dialog>
+  <dialog id="help-dialog"><div class="dialog-heading"><h2>See what a policy change changes.</h2><button class="icon-button" data-close="help-dialog" aria-label="Close help">×</button></div><p>RuleTrace uses local Gemma 4 to propose source-linked rules. You review each interpretation, then a deterministic Python evaluator compares borrowing requests under both policies.</p><p>Supported concepts: equipment item limits, duration in days, and training prerequisites. Unsupported clauses remain visible and prevent definitive outcomes.</p><p>Compare UTF-8 .txt policies up to 2 MB each, including insurance or other policy documents. Gemma notes cover selected changes only. Equipment-rule extraction supports short policies up to 6,500 bytes; insurance eligibility is not evaluated. Blank case inputs are unknown. Reviews are held in this server's memory for up to two hours.</p><p class="callout">This is a decision-support prototype, using fictional demo data. AI interpretations are not automatically correct.</p></dialog>
+<dialog id="note-edit-dialog"><form id="note-edit-form"><div class="dialog-heading"><h2>Correct the interpretation</h2><button type="button" class="icon-button" data-close="note-edit-dialog" aria-label="Close note editor">×</button></div><label for="note-correction">Your interpretation</label><textarea id="note-correction" maxlength="1500" required></textarea><p class="muted">The original proposal and source passages stay in the audit trail.</p><button class="button primary" type="submit">Save correction</button></form></dialog>
+  <div id="toast" role="status" hidden></div>
+</body>
+</html>

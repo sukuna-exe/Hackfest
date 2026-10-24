@@ -1,0 +1,18 @@
+{
+  "demo": {
+    "model": "gemma4:e2b",
+    "digest": "b37049369adfe3d2b653af0ab301a062ca5cbe96ace6aa0d3f2559ee9b563fc2",
+    "mode": "live-local-ollama",
+    "latency_seconds": 53.419,
+    "attempts": 2
+  },
+  "held_out": {
+    "model": "gemma4:e2b",
+    "digest": "b37049369adfe3d2b653af0ab301a062ca5cbe96ace6aa0d3f2559ee9b563fc2",
+    "mode": "live-local-ollama",
+    "latency_seconds": 53.916,
+    "attempts": 2
+  },
+  "status": "passed",
+  "scope": "two synthetic policy pairs; not an accuracy estimate"
+}
